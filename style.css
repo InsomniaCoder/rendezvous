@@ -450,11 +450,6 @@ main {
   border: 1px solid #e0e7ff;
 }
 
-.badge-planned {
-  background: #fff7ed;
-  color: #c2410c;
-  border: 1px solid #fed7aa;
-}
 
 .btn-delete {
   background: none;
