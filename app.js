@@ -398,18 +398,6 @@ function render() {
 }
 
 // ---------------------------------------------------------------------------
-// Seed Data
-// ---------------------------------------------------------------------------
-
-state.stays = [
-  { id: '1', person: 'you', from: new Date(Date.now() - 60*24*60*60*1000), to: new Date(Date.now() - 47*24*60*60*1000), country: 'France', planned: false },
-  { id: '2', person: 'you', from: new Date(Date.now() - 30*24*60*60*1000), to: new Date(Date.now() - 21*24*60*60*1000), country: 'Germany', planned: false },
-  { id: '3', person: 'you', from: new Date(Date.now() + 10*24*60*60*1000), to: new Date(Date.now() + 24*24*60*60*1000), country: 'Italy', planned: true },
-  { id: '4', person: 'partner', from: new Date(Date.now() - 90*24*60*60*1000), to: new Date(Date.now() - 72*24*60*60*1000), country: 'Spain', planned: false },
-  { id: '5', person: 'partner', from: new Date(Date.now() - 20*24*60*60*1000), to: new Date(Date.now() - 10*24*60*60*1000), planned: false },
-];
-
-// ---------------------------------------------------------------------------
 // Init
 // ---------------------------------------------------------------------------
 
@@ -452,7 +440,28 @@ document.addEventListener('DOMContentLoaded', () => {
     render();
   });
 
-  document.getElementById('btn-add-stay').addEventListener('click', () => openAddPopover(new Date()));
+  document.getElementById('btn-add-stay').addEventListener('click', () => openAddPopover(state.today));
+
+  const simulateDateInput = document.getElementById('simulate-date');
+  const simulateClearBtn = document.getElementById('simulate-clear');
+
+  simulateDateInput.addEventListener('change', () => {
+    if (simulateDateInput.value) {
+      state.today = startOfDay(new Date(simulateDateInput.value));
+      simulateClearBtn.classList.remove('hidden');
+    } else {
+      state.today = new Date();
+      simulateClearBtn.classList.add('hidden');
+    }
+    render();
+  });
+
+  simulateClearBtn.addEventListener('click', () => {
+    state.today = new Date();
+    simulateDateInput.value = '';
+    simulateClearBtn.classList.add('hidden');
+    render();
+  });
 
   setupToggleButtons();
   render();
