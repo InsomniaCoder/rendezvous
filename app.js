@@ -387,8 +387,8 @@ function escapeHtml(str) {
 function setActiveToggle(group, value) {
   const btns = group === 'person'
     ? [document.getElementById('person-you'), document.getElementById('person-partner')]
-    : [document.getElementById('type-past'), document.getElementById('type-planned')];
-  btns.forEach(b => b.classList.toggle('active', b.dataset.value === value));
+    : [];
+  btns.forEach(b => b && b.classList.toggle('active', b.dataset.value === value));
 }
 
 function openAddPopover(date) {
@@ -398,8 +398,6 @@ function openAddPopover(date) {
   document.getElementById('to-date').value = dateStr;
   document.getElementById('country').value = '';
   setActiveToggle('person', 'you');
-  const isPlanned = startOfDay(date) >= startOfDay(state.today);
-  setActiveToggle('type', isPlanned ? 'true' : 'false');
   hideViolationWarning();
   editingStayId = null;
   document.getElementById('popover-overlay').classList.remove('hidden');
@@ -459,13 +457,6 @@ function setupToggleButtons() {
     document.getElementById(id).addEventListener('click', () => {
       setActiveToggle('person', document.getElementById(id).dataset.value);
       checkViolation();
-    });
-  });
-  ['type-past', 'type-planned'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener('click', () => {
-      setActiveToggle('type', el.dataset.value);
     });
   });
   function syncToDate() {
