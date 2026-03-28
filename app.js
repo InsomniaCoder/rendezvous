@@ -378,8 +378,16 @@ function renderStayList() {
       </div>`;
   }).join('');
 
+  container.querySelectorAll('.stay-entry').forEach(row => {
+    row.addEventListener('click', () => {
+      const stay = state.stays.find(s => s.id === row.querySelector('.btn-delete').dataset.id);
+      if (stay) openEditPopover(stay);
+    });
+  });
+
   container.querySelectorAll('.btn-delete').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       state.stays = state.stays.filter(s => s.id !== btn.dataset.id);
       render();
     });
