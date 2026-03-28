@@ -27,7 +27,7 @@ function addDays(date, n) {
  * Both dates are normalised to UTC midnight before computing.
  */
 function diffDays(a, b) {
-  return Math.round((toDay(a) - toDay(b)) / 86400000);
+  return Math.trunc((toDay(a) - toDay(b)) / 86400000);
 }
 
 // ---------------------------------------------------------------------------
@@ -92,8 +92,13 @@ function daysRemaining(stays, person, referenceDate) {
  * Tests whether adding `newStay` for `person` would violate the 90/180 rule
  * on any day during that stay.
  *
+ * CALLER CONTRACT: `existingStays` must NOT contain `newStay` (or any object
+ * representing the same trip). The function constructs a synthetic stay for
+ * `newStay` internally; if `newStay` is also present in `existingStays` those
+ * days will be double-counted, producing an incorrect (too-high) result.
+ *
  * @param {Object} newStay        - Stay to test (from/to/person fields used)
- * @param {Array}  existingStays  - Already-recorded stays
+ * @param {Array}  existingStays  - Already-recorded stays (must not include newStay)
  * @param {string} person
  * @returns {{ exceeds: boolean, firstViolationDate: Date|null }}
  */
@@ -112,7 +117,6 @@ function wouldExceedLimit(newStay, existingStays, person) {
       person,
       from: toDay(from),
       to:   toDay(current),
-      planned: true,
     };
 
     const tempStays = personStays.concat([syntheticStay]);

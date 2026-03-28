@@ -39,7 +39,7 @@ function test(name, fn) {
 // Window: 2023-09-04 → 2024-03-01  (180 days)
 
 const REF = d('2024-03-01');
-// windowStart = REF - 179 days = 2023-09-02
+// windowStart = REF - 179 days = 2023-09-04
 // windowEnd   = REF             = 2024-03-01
 
 // ---------------------------------------------------------------------------
@@ -203,7 +203,7 @@ test('nextRolloffDate: past stay exists → returns correct rolloff date and day
 // ---------------------------------------------------------------------------
 // 10b. nextRolloffDate: multi-day stay where multiple days roll off together
 // ---------------------------------------------------------------------------
-test('nextRolloffDate: multi-day stay rolls off daysFreed correctly for a single-day stay', () => {
+test('nextRolloffDate: single-day stay rolls off daysFreed correctly', () => {
   // Stay: 2024-01-10 – 2024-01-10 (1 day only)
   // Rolloff: 2024-01-10 + 180 = 2024-07-08, daysFreed = 1
   const stays = [
