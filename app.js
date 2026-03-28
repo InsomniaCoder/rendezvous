@@ -113,10 +113,23 @@ function renderTimeline() {
   if (!canvas) return;
   _canvas = canvas;
 
-  canvas.height = CANVAS_HEIGHT;
-  canvas.width = canvas.offsetWidth;
+  // --- DPI fix: scale canvas backing store to devicePixelRatio ---
+  const dpr = window.devicePixelRatio || 1;
+  const cssWidth = canvas.offsetWidth;
+  const cssHeight = CANVAS_HEIGHT;
+
+  // Set the CSS display size once (keeps layout stable)
+  canvas.style.width = cssWidth + 'px';
+  canvas.style.height = cssHeight + 'px';
+
+  // Set the actual pixel buffer at physical resolution
+  canvas.width = Math.round(cssWidth * dpr);
+  canvas.height = Math.round(cssHeight * dpr);
 
   const ctx = canvas.getContext('2d');
+  // Scale all drawing operations so 1 unit == 1 CSS pixel
+  ctx.scale(dpr, dpr);
+
   const today = startOfDay(state.today);
 
   const rangeStart = startOfDay(subMonths(today, 6));
@@ -126,7 +139,9 @@ function renderTimeline() {
   _rangeStart = rangeStart;
   _totalDays = totalDays;
 
-  const W = canvas.width;
+  // All drawing coordinates are in CSS pixels from here on
+  const W = cssWidth;
+  const H = cssHeight;
   const drawableWidth = W - LEFT_MARGIN;
 
   function dateToX(date) {
@@ -137,19 +152,67 @@ function renderTimeline() {
   const dayWidth = drawableWidth / totalDays;
   clickZones = [];
 
-  // 1. Background
+  // 1. Background — alternate row colours for the two person rows
   ctx.fillStyle = '#f5f7fa';
-  ctx.fillRect(0, 0, W, CANVAS_HEIGHT);
+  ctx.fillRect(0, 0, W, H);
 
-  // 2. 180-day window bracket
+  // "You" row — slightly lighter
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+  ctx.fillRect(0, LABEL_HEIGHT, W, ROW_HEIGHT);
+
+  // "Partner" row — slightly tinted
+  ctx.fillStyle = 'rgba(233, 30, 99, 0.04)';
+  ctx.fillRect(0, LABEL_HEIGHT + ROW_HEIGHT, W, ROW_HEIGHT);
+
+  // 2. 180-day window: yellow fill + a distinct top border line
   const windowStart = addDays(today, -179);
   const wxStart = dateToX(windowStart);
   const wxEnd = dateToX(today);
-  ctx.fillStyle = 'rgba(255, 235, 59, 0.25)';
-  ctx.fillRect(wxStart, 0, wxEnd - wxStart, CANVAS_HEIGHT);
 
-  // 3. Month labels
-  ctx.font = '11px system-ui, sans-serif';
+  ctx.fillStyle = 'rgba(255, 235, 59, 0.18)';
+  ctx.fillRect(wxStart, 0, wxEnd - wxStart, H);
+
+  // Top accent line for the window bracket
+  ctx.strokeStyle = 'rgba(245, 195, 0, 0.70)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(wxStart, 1);
+  ctx.lineTo(wxEnd, 1);
+  ctx.stroke();
+
+  // Left and right edge ticks for the bracket
+  ctx.strokeStyle = 'rgba(245, 195, 0, 0.55)';
+  ctx.lineWidth = 1.5;
+  [wxStart, wxEnd].forEach(x => {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, 6);
+    ctx.stroke();
+  });
+
+  // 3. Row separator lines
+  // Between label area and first row
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(LEFT_MARGIN, LABEL_HEIGHT);
+  ctx.lineTo(W, LABEL_HEIGHT);
+  ctx.stroke();
+
+  // Between the two person rows
+  ctx.beginPath();
+  ctx.moveTo(0, LABEL_HEIGHT + ROW_HEIGHT);
+  ctx.lineTo(W, LABEL_HEIGHT + ROW_HEIGHT);
+  ctx.stroke();
+
+  // Bottom of last row
+  ctx.beginPath();
+  ctx.moveTo(0, LABEL_HEIGHT + ROW_HEIGHT * 2);
+  ctx.lineTo(W, LABEL_HEIGHT + ROW_HEIGHT * 2);
+  ctx.stroke();
+
+  // 4. Month labels with tick marks
+  ctx.font = '11px Inter, system-ui, sans-serif';
   ctx.fillStyle = '#9e9e9e';
   ctx.textBaseline = 'top';
 
@@ -161,21 +224,29 @@ function renderTimeline() {
   while (labelDate <= rangeEnd) {
     const x = dateToX(labelDate);
     if (x >= LEFT_MARGIN && x <= W - 10) {
-      ctx.fillText(formatDate(labelDate), x + 2, 2);
+      ctx.fillText(formatDate(labelDate), x + 3, 3);
+
+      // Tick mark at bottom of label area
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x, LABEL_HEIGHT - 4);
+      ctx.lineTo(x, LABEL_HEIGHT);
+      ctx.stroke();
     }
     labelDate = new Date(labelDate);
     labelDate.setUTCMonth(labelDate.getUTCMonth() + 1);
   }
 
-  // 4. Person row labels
+  // 5. Person row labels
   ctx.textBaseline = 'middle';
-  ctx.font = 'bold 11px system-ui, sans-serif';
+  ctx.font = 'bold 11px Inter, system-ui, sans-serif';
   ctx.fillStyle = COLOR_YOU;
   ctx.fillText('You', 4, LABEL_HEIGHT + ROW_HEIGHT / 2);
   ctx.fillStyle = COLOR_PARTNER;
   ctx.fillText('Partner', 2, LABEL_HEIGHT + ROW_HEIGHT + ROW_HEIGHT / 2);
 
-  // 5. Stay bars
+  // 6. Stay bars
   for (const stay of state.stays) {
     const isYou = stay.person === 'you';
     const color = isYou ? COLOR_YOU : COLOR_PARTNER;
@@ -209,27 +280,50 @@ function renderTimeline() {
       }
       ctx.globalAlpha = 1;
       ctx.restore();
+
+      // Subtle border for planned bars
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.5;
+      ctx.strokeRect(clippedX1 + 0.5, barY + 0.5, clippedX2 - clippedX1 - 1, BAR_HEIGHT - 1);
+      ctx.globalAlpha = 1;
     } else {
       ctx.fillStyle = color;
       ctx.fillRect(clippedX1, barY, clippedX2 - clippedX1, BAR_HEIGHT);
+
+      // Subtle border for solid bars — slightly darker shade
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.18)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(clippedX1 + 0.5, barY + 0.5, clippedX2 - clippedX1 - 1, BAR_HEIGHT - 1);
     }
 
     clickZones.push({ stay, x1: clippedX1, x2: clippedX2, yTop: barY, yBottom: barY + BAR_HEIGHT });
   }
 
-  // 6. Today line
+  // 7. Today line — full-opacity red, slightly thicker, with a label above
   const todayX = dateToX(today);
-  ctx.strokeStyle = 'rgba(244, 67, 54, 0.8)';
-  ctx.lineWidth = 2;
+
+  // "Today" label above the line
+  ctx.font = '10px Inter, system-ui, sans-serif';
+  ctx.fillStyle = '#f44336';
+  ctx.textBaseline = 'top';
+  ctx.textAlign = 'center';
+  ctx.fillText('Today', todayX, 2);
+  ctx.textAlign = 'left'; // reset
+
+  ctx.strokeStyle = '#f44336';
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.moveTo(todayX, 0);
-  ctx.lineTo(todayX, CANVAS_HEIGHT);
+  ctx.moveTo(todayX, LABEL_HEIGHT);
+  ctx.lineTo(todayX, H);
   ctx.stroke();
 }
 
 function dateFromX(x) {
   if (!_canvas || _totalDays === 0) return null;
-  const days = Math.round((x - LEFT_MARGIN) / (_canvas.width - LEFT_MARGIN) * _totalDays);
+  // Use CSS pixel width (offsetWidth) so coordinate math stays in logical pixels
+  const cssWidth = _canvas.offsetWidth;
+  const days = Math.round((x - LEFT_MARGIN) / (cssWidth - LEFT_MARGIN) * _totalDays);
   return addDays(_rangeStart, days);
 }
 
