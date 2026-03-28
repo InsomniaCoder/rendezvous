@@ -76,7 +76,10 @@
         </div>
         <div class="form-row">
           <label for="country">Country</label>
-          <input type="text" id="country" placeholder="Optional">
+          <div class="country-combobox">
+            <input type="text" id="country" placeholder="Optional" autocomplete="off">
+            <ul id="country-dropdown" class="country-dropdown hidden"></ul>
+          </div>
         </div>
         <div class="form-row">
           <label>Type</label>

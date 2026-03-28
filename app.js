@@ -14,6 +14,18 @@ const state = {
 let editingStayId = null;
 
 // ---------------------------------------------------------------------------
+// Schengen Country List
+// ---------------------------------------------------------------------------
+
+const SCHENGEN_COUNTRIES = [
+  'Austria', 'Belgium', 'Croatia', 'Czech Republic', 'Denmark', 'Estonia',
+  'Finland', 'France', 'Germany', 'Greece', 'Hungary', 'Iceland', 'Italy',
+  'Latvia', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
+  'Norway', 'Poland', 'Portugal', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
+  'Switzerland'
+];
+
+// ---------------------------------------------------------------------------
 // Date Utility Helpers
 // ---------------------------------------------------------------------------
 
@@ -581,6 +593,56 @@ document.addEventListener('DOMContentLoaded', () => {
     render();
   });
 
+  setupCountryCombobox();
   setupToggleButtons();
   render();
 });
+
+// ---------------------------------------------------------------------------
+// Country Combobox
+// ---------------------------------------------------------------------------
+
+function setupCountryCombobox() {
+  const input = document.getElementById('country');
+  const dropdown = document.getElementById('country-dropdown');
+
+  function showSuggestions(query) {
+    const q = query.trim().toLowerCase();
+    const matches = q
+      ? SCHENGEN_COUNTRIES.filter(c => c.toLowerCase().includes(q))
+      : SCHENGEN_COUNTRIES;
+
+    if (matches.length === 0) {
+      dropdown.classList.add('hidden');
+      return;
+    }
+
+    dropdown.innerHTML = matches.map(c =>
+      `<li data-value="${c}">${c}</li>`
+    ).join('');
+    dropdown.classList.remove('hidden');
+  }
+
+  function closeDropdown() {
+    dropdown.classList.add('hidden');
+  }
+
+  input.addEventListener('focus', () => showSuggestions(input.value));
+  input.addEventListener('input', () => showSuggestions(input.value));
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDropdown();
+  });
+
+  dropdown.addEventListener('mousedown', (e) => {
+    const li = e.target.closest('li');
+    if (!li) return;
+    e.preventDefault(); // prevent input blur before click registers
+    input.value = li.dataset.value;
+    closeDropdown();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!input.closest('.country-combobox').contains(e.target)) closeDropdown();
+  });
+}
