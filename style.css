@@ -379,6 +379,7 @@ main {
   background: var(--color-bg);
   font-size: 0.8125rem;
   transition: border-color 0.15s, box-shadow 0.15s;
+  cursor: pointer;
 }
 
 .stay-entry:hover {
