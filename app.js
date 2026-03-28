@@ -65,12 +65,6 @@ function formatDateShort(date) {
   return months[date.getUTCMonth()] + ' ' + date.getUTCDate();
 }
 
-function formatRolloff(rolloffResult) {
-  if (!rolloffResult) return '—';
-  const { date, daysFreed } = rolloffResult;
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return daysFreed + 'd free on ' + months[date.getUTCMonth()] + ' ' + date.getUTCDate();
-}
 
 function toDateInputValue(date) {
   const d = startOfDay(date);
@@ -90,15 +84,12 @@ function updateSummaryBar() {
     const card = document.getElementById(person === 'you' ? 'summary-you' : 'summary-partner');
     const used = daysInWindow(state.stays, person, today);
     const remaining = daysRemaining(state.stays, person, today);
-    const rolloff = nextRolloffDate(state.stays, person, today);
-
     const total = state.stays
       .filter(s => s.person === person)
       .reduce((sum, s) => sum + diffDays(s.to, s.from) + 1, 0);
 
     card.querySelector('.days-used').textContent = used + ' / 90 days';
     card.querySelector('.days-remaining').textContent = remaining + ' days remaining';
-    card.querySelector('.rolloff-info').textContent = formatRolloff(rolloff);
     card.querySelector('.days-total').textContent = total + ' days total across all stays';
     card.classList.toggle('warning', remaining <= 20);
   }
@@ -337,6 +328,10 @@ function onCanvasClick(e) {
 function renderStayList() {
   const container = document.getElementById('stay-list');
   if (!container) return;
+
+  const totalTogether = state.stays.reduce((sum, s) => sum + diffDays(s.to, s.from) + 1, 0);
+  const togetherEl = document.getElementById('time-together');
+  if (togetherEl) togetherEl.textContent = totalTogether > 0 ? totalTogether + 'd together · ' : '';
 
   if (state.stays.length === 0) {
     container.innerHTML = '<p class="stay-empty">No stays added yet.</p>';
