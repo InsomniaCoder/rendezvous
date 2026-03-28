@@ -484,6 +484,15 @@ function render() {
 window.addEventListener('resize', renderTimeline);
 
 document.addEventListener('DOMContentLoaded', () => {
+  state.stays = [
+    { id: '1', person: 'you',     from: new Date('2025-04-21'), to: new Date('2025-05-02') },
+    { id: '2', person: 'you',     from: new Date('2025-05-09'), to: new Date('2025-05-21') },
+    { id: '3', person: 'you',     from: new Date('2025-08-01'), to: new Date('2025-08-16') },
+    { id: '4', person: 'partner', from: new Date('2025-07-04'), to: new Date('2025-07-12') },
+    { id: '5', person: 'partner', from: new Date('2025-09-04'), to: new Date('2025-09-12') },
+    { id: '6', person: 'partner', from: new Date('2025-10-04'), to: new Date('2025-10-12') },
+  ];
+
   const canvas = document.getElementById('timeline-canvas');
   if (canvas) canvas.addEventListener('click', onCanvasClick);
 
