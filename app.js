@@ -359,7 +359,7 @@ function renderStayList() {
     return;
   }
 
-  const sorted = [...state.stays].sort((a, b) => b.from - a.from);
+  const sorted = [...state.stays].sort((a, b) => a.from - b.from);
 
   container.innerHTML = sorted.map(stay => {
     const dotClass = stay.person === 'you' ? 'you' : 'partner';
@@ -538,6 +538,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       state.stays.push({ id: Date.now().toString(), person, from: new Date(fromVal), to: new Date(toVal), country, planned });
     }
+
+    state.stays.sort((a, b) => a.from - b.from);
 
     closePopover();
     render();
