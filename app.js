@@ -445,21 +445,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const simulateDateInput = document.getElementById('simulate-date');
   const simulateClearBtn = document.getElementById('simulate-clear');
 
+  simulateDateInput.value = toDateInputValue(state.today);
+
   simulateDateInput.addEventListener('change', () => {
     if (simulateDateInput.value) {
       state.today = startOfDay(new Date(simulateDateInput.value));
-      simulateClearBtn.classList.remove('hidden');
     } else {
       state.today = new Date();
-      simulateClearBtn.classList.add('hidden');
+      simulateDateInput.value = toDateInputValue(state.today);
     }
     render();
   });
 
   simulateClearBtn.addEventListener('click', () => {
     state.today = new Date();
-    simulateDateInput.value = '';
-    simulateClearBtn.classList.add('hidden');
+    simulateDateInput.value = toDateInputValue(state.today);
     render();
   });
 
