@@ -80,9 +80,14 @@ function updateSummaryBar() {
     const remaining = daysRemaining(state.stays, person, today);
     const rolloff = nextRolloffDate(state.stays, person, today);
 
+    const total = state.stays
+      .filter(s => s.person === person)
+      .reduce((sum, s) => sum + diffDays(s.to, s.from) + 1, 0);
+
     card.querySelector('.days-used').textContent = used + ' / 90 days';
     card.querySelector('.days-remaining').textContent = remaining + ' days remaining';
     card.querySelector('.rolloff-info').textContent = formatRolloff(rolloff);
+    card.querySelector('.days-total').textContent = total + ' days total across all stays';
     card.classList.toggle('warning', remaining <= 20);
   }
 }
