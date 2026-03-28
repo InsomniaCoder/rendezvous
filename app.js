@@ -477,7 +477,16 @@ function setupToggleButtons() {
       setActiveToggle('type', document.getElementById(id).dataset.value);
     });
   });
-  document.getElementById('from-date').addEventListener('change', checkViolation);
+  function syncToDate() {
+    const fromVal = document.getElementById('from-date').value;
+    const toInput = document.getElementById('to-date');
+    if (fromVal && (!toInput.value || toInput.value < fromVal)) {
+      toInput.value = fromVal;
+    }
+    checkViolation();
+  }
+  document.getElementById('from-date').addEventListener('change', syncToDate);
+  document.getElementById('from-date').addEventListener('input', syncToDate);
   document.getElementById('to-date').addEventListener('change', checkViolation);
 }
 
