@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schengen Calculator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Schengen Calculator</h1>
+    <p class="subtitle">Track your 90/180-day Schengen stays</p>
+  </header>
+  <main>
+    <!-- summary bar -->
+    <div id="summary-bar">
+      <div id="summary-you" class="summary-card">
+        <div class="person-label">You</div>
+        <div class="days-used">0 / 90 days</div>
+        <div class="days-remaining">90 days remaining</div>
+        <div class="rolloff-info"></div>
+      </div>
+      <div id="summary-partner" class="summary-card">
+        <div class="person-label">Partner</div>
+        <div class="days-used">0 / 90 days</div>
+        <div class="days-remaining">90 days remaining</div>
+        <div class="rolloff-info"></div>
+      </div>
+    </div>
+
+    <!-- timeline -->
+    <div id="timeline-container">
+      <canvas id="timeline-canvas"></canvas>
+    </div>
+
+    <!-- stay list -->
+    <div id="stay-list-container">
+      <h2>Stays <button id="btn-add-stay" type="button">+ Add Stay</button></h2>
+      <div id="stay-list"></div>
+    </div>
+  </main>
+
+  <!-- popover overlay -->
+  <div id="popover-overlay" class="hidden">
+    <div id="popover">
+      <h3 id="popover-title">Add Stay</h3>
+      <form id="stay-form">
+        <div class="form-row">
+          <label>Person</label>
+          <div class="toggle-group">
+            <button type="button" id="person-you" class="toggle-btn active" data-value="you">You</button>
+            <button type="button" id="person-partner" class="toggle-btn" data-value="partner">Partner</button>
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="from-date">From</label>
+          <input type="date" id="from-date" required>
+        </div>
+        <div class="form-row">
+          <label for="to-date">To</label>
+          <input type="date" id="to-date" required>
+        </div>
+        <div class="form-row">
+          <label for="country">Country</label>
+          <input type="text" id="country" placeholder="Optional">
+        </div>
+        <div class="form-row">
+          <label>Type</label>
+          <div class="toggle-group">
+            <button type="button" id="type-past" class="toggle-btn" data-value="false">Past</button>
+            <button type="button" id="type-planned" class="toggle-btn active" data-value="true">Planned</button>
+          </div>
+        </div>
+        <div id="violation-warning" class="hidden warning-box">
+          &#9888; This stay would exceed the 90-day limit
+          <span id="violation-date"></span>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="btn-cancel">Cancel</button>
+          <button type="submit" id="btn-save">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="schengen.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
