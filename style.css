@@ -273,6 +273,13 @@ main {
   line-height: 1.4;
 }
 
+.days-total {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
 /* ============================================================
    Window explanation
    ============================================================ */
