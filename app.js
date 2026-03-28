@@ -196,7 +196,7 @@ function renderTimeline() {
   // "Partner" label
   ctx.fillStyle = COLOR_PARTNER;
   const partnerRowMidY = LABEL_HEIGHT + ROW_HEIGHT + ROW_HEIGHT / 2;
-  ctx.fillText('Ptnr', 2, partnerRowMidY);
+  ctx.fillText('Partner', 2, partnerRowMidY);
 
   // 5. Stay bars
   for (const stay of state.stays) {
