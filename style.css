@@ -308,11 +308,6 @@ main {
   color: #3949ab;
 }
 
-.badge-planned {
-  background: #fff3e0;
-  color: #e65100;
-  border: 1px solid #ffe0b2;
-}
 
 .btn-delete {
   background: none;

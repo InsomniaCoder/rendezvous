@@ -100,8 +100,6 @@ const LEFT_MARGIN = 50;
 
 const COLOR_YOU = '#3f51b5';
 const COLOR_PARTNER = '#e91e63';
-const COLOR_YOU_LIGHT = 'rgba(63, 81, 181, 0.25)';
-const COLOR_PARTNER_LIGHT = 'rgba(233, 30, 99, 0.25)';
 
 let clickZones = [];
 let _rangeStart = null;
@@ -179,7 +177,6 @@ function renderTimeline() {
   for (const stay of state.stays) {
     const isYou = stay.person === 'you';
     const color = isYou ? COLOR_YOU : COLOR_PARTNER;
-    const colorLight = isYou ? COLOR_YOU_LIGHT : COLOR_PARTNER_LIGHT;
 
     const x1 = dateToX(stay.from);
     const x2 = dateToX(stay.to) + dayWidth;
@@ -189,30 +186,8 @@ function renderTimeline() {
 
     const barY = LABEL_HEIGHT + (isYou ? 0 : ROW_HEIGHT) + ROW_PADDING;
 
-    if (stay.planned) {
-      ctx.fillStyle = colorLight;
-      ctx.fillRect(clippedX1, barY, clippedX2 - clippedX1, BAR_HEIGHT);
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(clippedX1, barY, clippedX2 - clippedX1, BAR_HEIGHT);
-      ctx.clip();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.45;
-      const totalSpan = (clippedX2 - clippedX1) + BAR_HEIGHT;
-      for (let offset = -BAR_HEIGHT; offset <= totalSpan; offset += 6) {
-        ctx.beginPath();
-        ctx.moveTo(clippedX1 + offset, barY);
-        ctx.lineTo(clippedX1 + offset + BAR_HEIGHT, barY + BAR_HEIGHT);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-      ctx.restore();
-    } else {
-      ctx.fillStyle = color;
-      ctx.fillRect(clippedX1, barY, clippedX2 - clippedX1, BAR_HEIGHT);
-    }
+    ctx.fillStyle = color;
+    ctx.fillRect(clippedX1, barY, clippedX2 - clippedX1, BAR_HEIGHT);
 
     clickZones.push({ stay, x1: clippedX1, x2: clippedX2, yTop: barY, yBottom: barY + BAR_HEIGHT });
   }
@@ -272,14 +247,12 @@ function renderStayList() {
     const duration = diffDays(stay.to, stay.from) + 1;
     const dates = formatDateShort(stay.from) + ' – ' + formatDateShort(stay.to);
     const countryBadge = stay.country ? `<span class="badge badge-country">${escapeHtml(stay.country)}</span>` : '';
-    const plannedBadge = stay.planned ? '<span class="badge badge-planned">Planned</span>' : '';
     return `
       <div class="stay-entry">
         <span class="stay-dot ${dotClass}"></span>
         <span class="stay-dates">${dates}</span>
         <span class="stay-duration">${duration}d</span>
         ${countryBadge}
-        ${plannedBadge}
         <button class="btn-delete" data-id="${stay.id}">✕</button>
       </div>`;
   }).join('');
@@ -303,8 +276,8 @@ function escapeHtml(str) {
 function setActiveToggle(group, value) {
   const btns = group === 'person'
     ? [document.getElementById('person-you'), document.getElementById('person-partner')]
-    : [document.getElementById('type-past'), document.getElementById('type-planned')];
-  btns.forEach(b => b.classList.toggle('active', b.dataset.value === value));
+    : [];
+  btns.forEach(b => b && b.classList.toggle('active', b.dataset.value === value));
 }
 
 function openAddPopover(date) {
@@ -314,8 +287,6 @@ function openAddPopover(date) {
   document.getElementById('to-date').value = dateStr;
   document.getElementById('country').value = '';
   setActiveToggle('person', 'you');
-  const isPlanned = startOfDay(date) >= startOfDay(state.today);
-  setActiveToggle('type', isPlanned ? 'true' : 'false');
   hideViolationWarning();
   editingStayId = null;
   document.getElementById('popover-overlay').classList.remove('hidden');
@@ -327,7 +298,6 @@ function openEditPopover(stay) {
   document.getElementById('to-date').value = toDateInputValue(stay.to);
   document.getElementById('country').value = stay.country || '';
   setActiveToggle('person', stay.person);
-  setActiveToggle('type', stay.planned ? 'true' : 'false');
   hideViolationWarning();
   editingStayId = stay.id;
   document.getElementById('popover-overlay').classList.remove('hidden');
@@ -376,11 +346,6 @@ function setupToggleButtons() {
     document.getElementById(id).addEventListener('click', () => {
       setActiveToggle('person', document.getElementById(id).dataset.value);
       checkViolation();
-    });
-  });
-  ['type-past', 'type-planned'].forEach(id => {
-    document.getElementById(id).addEventListener('click', () => {
-      setActiveToggle('type', document.getElementById(id).dataset.value);
     });
   });
   document.getElementById('from-date').addEventListener('change', checkViolation);
