@@ -1,5 +1,7 @@
 # Rendezvous — Schengen Calculator
 
+**Live:** https://insomniacoder.github.io/rendezvous/
+
 Track 90/180-day Schengen stays for two people.
 
 ## What it does
